@@ -19,7 +19,9 @@ export default async function AdminKelulusanPage({
 
   const { data: students, error: studentsError } = await supabase
     .from("graduation_students")
-    .select("id, nis, nisn, student_name, class_name, major, status, note")
+    .select(
+      "id, nis, nisn, student_name, student_photo_url, class_name, major, status, note",
+    )
     .order("student_name", { ascending: true })
     .limit(100);
 
@@ -82,7 +84,12 @@ export default async function AdminKelulusanPage({
           <div className="mt-5 rounded-xl bg-[var(--secondary)] p-4 text-sm leading-6 text-[var(--secondary-foreground)]">
             <p className="font-semibold">Format kolom:</p>
             <p className="mt-1">
-              nis, nisn, student_name, class_name, major, status, note
+              nis, nisn, student_name, class_name, major, status, note,
+              student_photo_url, birth_place, birth_date, gender,
+              graduation_letter_number, graduation_letter_place,
+              graduation_letter_date, religion_score, pancasila_score,
+              indonesian_score, math_score, science_score, social_score,
+              pjok_score, art_score, total_score, average_score
             </p>
           </div>
           <a
@@ -159,6 +166,7 @@ export default async function AdminKelulusanPage({
             <table className="w-full min-w-[900px] text-left text-sm">
               <thead className="border-b border-gray-200 bg-gray-50 text-gray-600">
                 <tr>
+                  <th className="px-5 py-4 font-medium">Foto</th>
                   <th className="px-5 py-4 font-medium">Nama</th>
                   <th className="px-5 py-4 font-medium">NIS</th>
                   <th className="px-5 py-4 font-medium">NISN</th>
@@ -172,21 +180,41 @@ export default async function AdminKelulusanPage({
                 {students?.length ? (
                   students.map((student) => (
                     <tr key={student.id}>
+                      <td className="px-5 py-4">
+                        {student.student_photo_url ? (
+                          <img
+                            src={student.student_photo_url}
+                            alt={`Foto ${student.student_name}`}
+                            referrerPolicy="no-referrer"
+                            className="h-12 w-12 rounded-xl object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-xs text-gray-400">
+                            -
+                          </div>
+                        )}
+                      </td>
+
                       <td className="px-5 py-4 font-medium text-gray-950">
                         {student.student_name}
                       </td>
+
                       <td className="px-5 py-4 text-gray-600">
                         {student.nis || "-"}
                       </td>
+
                       <td className="px-5 py-4 text-gray-600">
                         {student.nisn || "-"}
                       </td>
+
                       <td className="px-5 py-4 text-gray-600">
                         {student.class_name || "-"}
                       </td>
+
                       <td className="px-5 py-4 text-gray-600">
                         {student.major || "-"}
                       </td>
+
                       <td className="px-5 py-4">
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-medium ${
@@ -203,7 +231,7 @@ export default async function AdminKelulusanPage({
                 ) : (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="px-5 py-10 text-center text-gray-500"
                     >
                       Belum ada data kelulusan.

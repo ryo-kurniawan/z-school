@@ -58,11 +58,13 @@ export default async function AdminSettingPage({
           </div>
         ) : null}
 
-        <form action={updateSiteSetting} className="mt-8 w-full">
-          
+        <form
+          action={updateSiteSetting}
+          className="mt-8 w-full"
+        >
           <input type="hidden" name="id" defaultValue={setting.id} />
 
-          <div className="grid w-full gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(380px,1fr)]">
+          <div className="grid w-full gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(340px,420px)]">
             <div className="space-y-6">
               <section className="rounded-2xl border border-gray-200 bg-white p-6">
                 <h2 className="text-lg font-semibold text-gray-950">
@@ -325,6 +327,52 @@ export default async function AdminSettingPage({
 
               <section className="rounded-2xl border border-gray-200 bg-white p-6">
                 <h2 className="text-lg font-semibold text-gray-950">
+                  Logo Pemerintah Kabupaten
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-gray-500">
+                  Logo ini digunakan di kop surat SKL bagian kiri.
+                </p>
+
+                {setting.government_logo_url ? (
+                  <div className="mt-5 flex justify-center rounded-2xl border border-gray-200 bg-gray-50 p-6">
+                    <img
+                      src={setting.government_logo_url}
+                      alt="Logo pemerintah kabupaten"
+                      className="h-28 w-28 object-contain"
+                    />
+                  </div>
+                ) : (
+                  <div className="mt-5 flex h-36 items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-400">
+                    Belum ada logo pemerintah
+                  </div>
+                )}
+
+                <input
+                  name="government_logo"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                  className="mt-5 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-950 outline-none transition file:mr-4 file:rounded-lg file:border-0 file:bg-[var(--primary)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-[var(--primary-foreground)] hover:file:opacity-90"
+                />
+
+                <p className="mt-2 text-xs text-gray-500">
+                  Format JPG, PNG, WebP, atau SVG. Maksimal 5MB.
+                </p>
+
+                {setting.government_logo_url ? (
+                  <label className="mt-4 flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 p-3 text-sm font-medium text-red-700">
+                    <input
+                      name="remove_government_logo"
+                      type="checkbox"
+                      className="h-4 w-4"
+                    />
+                    Hapus logo pemerintah saat ini
+                  </label>
+                ) : null}
+              </section>
+
+              <section className="rounded-2xl border border-gray-200 bg-white p-6">
+                <h2 className="text-lg font-semibold text-gray-950">
                   Banner Website
                 </h2>
 
@@ -369,15 +417,15 @@ export default async function AdminSettingPage({
                 ) : null}
               </section>
             </aside>
+          </div>
 
-            <div className="flex justify-end rounded-2xl border border-gray-200 bg-white p-6 xl:col-span-2">
-              <button
-                type="submit"
-                className="rounded-xl bg-[var(--primary)] px-6 py-3 text-sm font-medium text-[var(--primary-foreground)] transition hover:opacity-90"
-              >
-                Simpan Setting
-              </button>
-            </div>
+          <div className="mt-6 flex justify-end rounded-2xl border border-gray-200 bg-white p-6">
+            <button
+              type="submit"
+              className="rounded-xl bg-[var(--primary)] px-6 py-3 text-sm font-medium text-[var(--primary-foreground)] transition hover:opacity-90"
+            >
+              Simpan Setting
+            </button>
           </div>
         </form>
       </div>

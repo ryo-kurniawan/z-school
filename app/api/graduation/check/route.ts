@@ -48,7 +48,19 @@ export async function POST(request: Request) {
 
     const { data: student, error: studentError } = await supabase
       .from("graduation_students")
-      .select("student_name, nis, nisn, class_name, major, status, note")
+      .select(
+        `
+        id,
+        student_name,
+        nis,
+        nisn,
+        class_name,
+        major,
+        status,
+        note,
+        student_photo_url
+      `
+      )
       .or(`nis.eq.${identifier},nisn.eq.${identifier}`)
       .maybeSingle();
 

@@ -49,10 +49,7 @@ async function deleteStorageFileByPublicUrl({
 }) {
   if (!publicUrl) return;
 
-  const filePath = getStoragePathFromPublicUrl(
-    publicUrl,
-    SITE_ASSETS_BUCKET
-  );
+  const filePath = getStoragePathFromPublicUrl(publicUrl, SITE_ASSETS_BUCKET);
 
   if (!filePath) return;
 
@@ -67,7 +64,7 @@ async function uploadSiteAsset({
 }: {
   supabase: Awaited<ReturnType<typeof createClient>>;
   file: File;
-  folder: "logo" | "banner";
+  folder: "logo" | "banner" | "government-logo";
   filenamePrefix: string;
 }) {
   const extension = getFileExtension(file.name);
@@ -111,7 +108,7 @@ export async function updateSiteSetting(formData: FormData) {
   const accreditation = String(formData.get("accreditation") || "").trim();
 
   const graduationMessage = String(
-    formData.get("graduation_message") || ""
+    formData.get("graduation_message") || "",
   ).trim();
 
   const graduationAnnouncementEnabled =
@@ -119,9 +116,11 @@ export async function updateSiteSetting(formData: FormData) {
 
   const logoFile = formData.get("logo");
   const bannerFile = formData.get("banner");
+  const governmentLogoFile = formData.get("government_logo");
 
   const removeLogo = formData.get("remove_logo") === "on";
   const removeBanner = formData.get("remove_banner") === "on";
+  const removeGovernmentLogo = formData.get("remove_government_logo") === "on";
 
   if (!id) {
     redirect("/admin/setting?error=Data setting tidak ditemukan");
@@ -139,7 +138,7 @@ export async function updateSiteSetting(formData: FormData) {
 
   const { data: currentSetting, error: currentSettingError } = await supabase
     .from("site_settings")
-    .select("logo_url, banner_url")
+    .select("logo_url, banner_url, government_logo_url")
     .eq("id", id)
     .maybeSingle();
 
@@ -149,12 +148,13 @@ export async function updateSiteSetting(formData: FormData) {
 
   let nextLogoUrl: string | null | undefined = undefined;
   let nextBannerUrl: string | null | undefined = undefined;
+  let nextGovernmentLogoUrl: string | null | undefined = undefined;
 
   try {
     if (logoFile instanceof File && logoFile.size > 0) {
       if (!isValidFile(logoFile, ALLOWED_LOGO_TYPES)) {
         redirect(
-          "/admin/setting?error=Logo harus berupa JPG, PNG, WebP, atau SVG dengan ukuran maksimal 5MB"
+          "/admin/setting?error=Logo harus berupa JPG, PNG, WebP, atau SVG dengan ukuran maksimal 5MB",
         );
       }
 
@@ -168,10 +168,27 @@ export async function updateSiteSetting(formData: FormData) {
       nextLogoUrl = null;
     }
 
+    if (governmentLogoFile instanceof File && governmentLogoFile.size > 0) {
+      if (!isValidFile(governmentLogoFile, ALLOWED_LOGO_TYPES)) {
+        redirect(
+          "/admin/setting?error=Logo pemerintah harus berupa JPG, PNG, WebP, atau SVG dengan ukuran maksimal 5MB",
+        );
+      }
+
+      nextGovernmentLogoUrl = await uploadSiteAsset({
+        supabase,
+        file: governmentLogoFile,
+        folder: "government-logo",
+        filenamePrefix: "government-logo",
+      });
+    } else if (removeGovernmentLogo) {
+      nextGovernmentLogoUrl = null;
+    }
+
     if (bannerFile instanceof File && bannerFile.size > 0) {
       if (!isValidFile(bannerFile, ALLOWED_BANNER_TYPES)) {
         redirect(
-          "/admin/setting?error=Banner harus berupa JPG, PNG, atau WebP dengan ukuran maksimal 5MB"
+          "/admin/setting?error=Banner harus berupa JPG, PNG, atau WebP dengan ukuran maksimal 5MB",
         );
       }
 
@@ -209,6 +226,7 @@ export async function updateSiteSetting(formData: FormData) {
     graduation_announcement_enabled: boolean;
     logo_url?: string | null;
     banner_url?: string | null;
+    government_logo_url?: string | null;
   } = {
     school_name: schoolName,
     school_level: schoolLevel,
@@ -231,6 +249,10 @@ export async function updateSiteSetting(formData: FormData) {
     updatePayload.logo_url = nextLogoUrl;
   }
 
+  if (nextGovernmentLogoUrl !== undefined) {
+    updatePayload.government_logo_url = nextGovernmentLogoUrl;
+  }
+
   if (nextBannerUrl !== undefined) {
     updatePayload.banner_url = nextBannerUrl;
   }
@@ -248,6 +270,13 @@ export async function updateSiteSetting(formData: FormData) {
       });
     }
 
+    if (nextGovernmentLogoUrl) {
+      await deleteStorageFileByPublicUrl({
+        supabase,
+        publicUrl: nextGovernmentLogoUrl,
+      });
+    }
+
     if (nextBannerUrl) {
       await deleteStorageFileByPublicUrl({
         supabase,
@@ -262,6 +291,13 @@ export async function updateSiteSetting(formData: FormData) {
     await deleteStorageFileByPublicUrl({
       supabase,
       publicUrl: currentSetting.logo_url,
+    });
+  }
+
+  if (nextGovernmentLogoUrl !== undefined) {
+    await deleteStorageFileByPublicUrl({
+      supabase,
+      publicUrl: currentSetting.government_logo_url,
     });
   }
 
