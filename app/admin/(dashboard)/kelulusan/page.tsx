@@ -88,7 +88,7 @@ export default async function AdminKelulusanPage({
               student_photo_url, birth_place, birth_date, gender,
               graduation_letter_number, graduation_letter_place,
               graduation_letter_date, religion_score, pancasila_score,
-              indonesian_score, math_score, science_score, social_score,
+              indonesian_score, math_score, ipas_score,
               pjok_score, art_score, total_score, average_score
             </p>
           </div>
