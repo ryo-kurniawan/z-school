@@ -26,12 +26,11 @@ export async function GET() {
       pancasila_score: 81.23,
       indonesian_score: 82.63,
       math_score: 82.5,
-      science_score: 81.8,
-      social_score: 81.25,
+      ipas_score: 81.8,
       pjok_score: 80.88,
       art_score: 83.83,
-      total_score: 654.28,
-      average_score: 81.78,
+      total_score: 573.05,
+      average_score: 81.86,
     },
     {
       nis: "12346",
@@ -56,8 +55,7 @@ export async function GET() {
       pancasila_score: "",
       indonesian_score: "",
       math_score: "",
-      science_score: "",
-      social_score: "",
+      ipas_score: "",
       pjok_score: "",
       art_score: "",
       total_score: "",
@@ -87,8 +85,7 @@ export async function GET() {
     "pancasila_score",
     "indonesian_score",
     "math_score",
-    "science_score",
-    "social_score",
+    "ipas_score",
     "pjok_score",
     "art_score",
     "total_score",
@@ -121,8 +118,7 @@ export async function GET() {
     { wch: 18 }, // pancasila_score
     { wch: 18 }, // indonesian_score
     { wch: 18 }, // math_score
-    { wch: 18 }, // science_score
-    { wch: 18 }, // social_score
+    { wch: 18 }, // ipas_score
     { wch: 18 }, // pjok_score
     { wch: 18 }, // art_score
     { wch: 18 }, // total_score

@@ -28,8 +28,7 @@ type GraduationExcelRow = {
   pancasila_score?: string | number;
   indonesian_score?: string | number;
   math_score?: string | number;
-  science_score?: string | number;
-  social_score?: string | number;
+  ipas_score?: string | number;
   pjok_score?: string | number;
   art_score?: string | number;
   total_score?: string | number;
@@ -131,7 +130,7 @@ export async function importGraduationStudents(formData: FormData) {
 
       if (!status) {
         throw new Error(
-          `Baris ${rowNumber}: status wajib LULUS atau TIDAK_LULUS`
+          `Baris ${rowNumber}: status wajib LULUS atau TIDAK_LULUS`,
         );
       }
 
@@ -152,18 +151,14 @@ export async function importGraduationStudents(formData: FormData) {
 
         graduation_letter_number:
           cleanText(row.graduation_letter_number) || null,
-        graduation_letter_place:
-          cleanText(row.graduation_letter_place) || null,
+        graduation_letter_place: cleanText(row.graduation_letter_place) || null,
         graduation_letter_date: cleanText(row.graduation_letter_date) || null,
 
         religion_score: cleanNumber(row.religion_score),
-        pancasila_score: cleanNumber(
-          row.pancasila_score || row.pancila_score
-        ),
+        pancasila_score: cleanNumber(row.pancasila_score || row.pancila_score),
         indonesian_score: cleanNumber(row.indonesian_score),
         math_score: cleanNumber(row.math_score),
-        science_score: cleanNumber(row.science_score),
-        social_score: cleanNumber(row.social_score),
+        ipas_score: cleanNumber(row.ipas_score),
         pjok_score: cleanNumber(row.pjok_score),
         art_score: cleanNumber(row.art_score),
         total_score: cleanNumber(row.total_score),
@@ -191,7 +186,7 @@ export async function importGraduationStudents(formData: FormData) {
     }
 
     redirectUrl = `/admin/kelulusan?success=${encodeURIComponent(
-      `${students.length} data kelulusan berhasil diimport`
+      `${students.length} data kelulusan berhasil diimport`,
     )}`;
   } catch (error) {
     const message =

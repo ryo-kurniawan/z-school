@@ -54,7 +54,9 @@ function safeFileName(value: string) {
     .toUpperCase();
 }
 
-async function imageUrlToDataUrl(url?: string | null): Promise<ImageData | null> {
+async function imageUrlToDataUrl(
+  url?: string | null,
+): Promise<ImageData | null> {
   if (!url) return null;
 
   try {
@@ -109,7 +111,7 @@ function addCenteredText(
   options?: {
     fontSize?: number;
     fontStyle?: "normal" | "bold" | "italic" | "bolditalic";
-  }
+  },
 ) {
   doc.setFontSize(options?.fontSize || 11);
   doc.setFont("times", options?.fontStyle || "normal");
@@ -123,7 +125,7 @@ function addLogo(
   image: ImageData | null,
   x: number,
   y: number,
-  size: number
+  size: number,
 ) {
   if (!image) return;
 
@@ -151,7 +153,7 @@ function addScoreTable(
   }>,
   totalScore: string,
   averageScore: string,
-  startY: number
+  startY: number,
 ) {
   const tableX = 25;
   const tableWidth = 160;
@@ -174,7 +176,7 @@ function addScoreTable(
     tableX + noWidth + subjectWidth,
     startY,
     tableX + noWidth + subjectWidth,
-    startY + tableHeight
+    startY + tableHeight,
   );
 
   for (let i = 1; i < totalRows; i++) {
@@ -195,7 +197,7 @@ function addScoreTable(
     startY + 4.7,
     {
       align: "center",
-    }
+    },
   );
 
   doc.text(
@@ -204,7 +206,7 @@ function addScoreTable(
     startY + 4.7,
     {
       align: "center",
-    }
+    },
   );
 
   doc.setFont("times", "normal");
@@ -225,7 +227,7 @@ function addScoreTable(
       y + 4.7,
       {
         align: "center",
-      }
+      },
     );
   });
 
@@ -244,7 +246,7 @@ function addScoreTable(
     totalY + 4.7,
     {
       align: "center",
-    }
+    },
   );
 
   doc.text(
@@ -253,7 +255,7 @@ function addScoreTable(
     averageY + 4.7,
     {
       align: "center",
-    }
+    },
   );
 
   doc.text(
@@ -262,7 +264,7 @@ function addScoreTable(
     averageY + 4.7,
     {
       align: "center",
-    }
+    },
   );
 
   return startY + tableHeight;
@@ -344,7 +346,7 @@ function generateSklPdf({
     56,
     {
       align: "center",
-    }
+    },
   );
 
   doc.setFont("times", "normal");
@@ -352,7 +354,7 @@ function generateSklPdf({
   doc.text(
     `Yang bertanda tangan di bawah ini Kepala ${schoolName} menerangkan bahwa :`,
     25,
-    68
+    68,
   );
 
   addRowText(doc, "N a m a", student.student_name || "-", 80);
@@ -360,7 +362,7 @@ function generateSklPdf({
     doc,
     "Tempat, Tanggal Lahir",
     `${student.birth_place || "-"}, ${formatDateIndonesian(student.birth_date)}`,
-    87
+    87,
   );
   addRowText(doc, "Jenis Kelamin", student.gender || "-", 94);
   addRowText(doc, "NIS", student.nis || "-", 101);
@@ -371,7 +373,7 @@ function generateSklPdf({
   doc.text(
     "Berdasarkan kriteria kelulusan peserta didik yang sudah ditetapkan, maka yang bersangkutan dinyatakan :",
     25,
-    121
+    121,
   );
 
   doc.setFont("times", "bold");
@@ -402,12 +404,8 @@ function generateSklPdf({
       score: formatScore(student.math_score),
     },
     {
-      name: "Ilmu Pengetahuan Alam",
-      score: formatScore(student.science_score),
-    },
-    {
-      name: "Ilmu Pengetahuan Sosial",
-      score: formatScore(student.social_score),
+      name: "Ilmu Pengetahuan Alam dan Sosial",
+      score: formatScore(student.ipas_score),
     },
     {
       name: "Pendidikan Jasmani, Olahraga, dan Kesehatan",
@@ -424,7 +422,7 @@ function generateSklPdf({
     subjects,
     formatScore(student.total_score),
     formatScore(student.average_score),
-    149
+    149,
   );
 
   doc.setFont("times", "normal");
@@ -432,7 +430,7 @@ function generateSklPdf({
   doc.text(
     "Demikian surat keterangan ini di buat, untuk dapat di pergunakan sebagaimana mestinya.",
     25,
-    tableEndY + 11
+    tableEndY + 11,
   );
 
   const signatureX = 137;
@@ -470,7 +468,7 @@ export async function GET(_request: Request, context: RouteParams) {
       phone,
       logo_url,
       government_logo_url
-    `
+    `,
     )
     .limit(1)
     .maybeSingle();
@@ -483,7 +481,7 @@ export async function GET(_request: Request, context: RouteParams) {
         message: "Gagal mengambil pengaturan sekolah.",
         detail: settingError.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -510,13 +508,12 @@ export async function GET(_request: Request, context: RouteParams) {
       pancasila_score,
       indonesian_score,
       math_score,
-      science_score,
-      social_score,
+      ipas_score,
       pjok_score,
       art_score,
       total_score,
       average_score
-    `
+    `,
     )
     .eq("id", id)
     .maybeSingle();
@@ -529,21 +526,21 @@ export async function GET(_request: Request, context: RouteParams) {
         message: "Gagal mengambil data siswa.",
         detail: studentError.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
   if (!student) {
     return NextResponse.json(
       { message: "Data siswa tidak ditemukan." },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
   if (student.status !== "LULUS") {
     return NextResponse.json(
       { message: "SKL hanya tersedia untuk siswa yang dinyatakan lulus." },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
