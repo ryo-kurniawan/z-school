@@ -1,10 +1,28 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
+const STUDENT_SELECT = `
+  id,
+  student_name,
+  nis,
+  nisn,
+  class_name,
+  major,
+  status,
+  note,
+  student_photo_url
+`;
+
+function cleanIdentifier(value: unknown) {
+  return String(value || "")
+    .trim()
+    .replace(/\s+/g, "");
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const identifier = String(body.identifier || "").trim();
+    const identifier = cleanIdentifier(body.identifier);
 
     if (!identifier) {
       return NextResponse.json(
@@ -12,7 +30,7 @@ export async function POST(request: Request) {
           success: false,
           message: "NIS atau NISN wajib diisi.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -25,12 +43,14 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (settingError) {
+      console.error("Setting error:", settingError);
+
       return NextResponse.json(
         {
           success: false,
           message: "Gagal membaca pengaturan kelulusan.",
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -42,36 +62,53 @@ export async function POST(request: Request) {
             setting?.graduation_message ||
             "Pengumuman kelulusan belum dibuka.",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
-    const { data: student, error: studentError } = await supabase
+    const { data: studentByNis, error: nisError } = await supabase
       .from("graduation_students")
-      .select(
-        `
-        id,
-        student_name,
-        nis,
-        nisn,
-        class_name,
-        major,
-        status,
-        note,
-        student_photo_url
-      `
-      )
-      .or(`nis.eq.${identifier},nisn.eq.${identifier}`)
+      .select(STUDENT_SELECT)
+      .eq("nis", identifier)
+      .limit(1)
       .maybeSingle();
 
-    if (studentError) {
+    if (nisError) {
+      console.error("NIS search error:", nisError);
+
       return NextResponse.json(
         {
           success: false,
-          message: "Terjadi kesalahan saat mencari data siswa.",
+          message: "Terjadi kesalahan saat mencari data siswa berdasarkan NIS.",
         },
-        { status: 500 }
+        { status: 500 },
       );
+    }
+
+    let student = studentByNis;
+
+    if (!student) {
+      const { data: studentByNisn, error: nisnError } = await supabase
+        .from("graduation_students")
+        .select(STUDENT_SELECT)
+        .eq("nisn", identifier)
+        .limit(1)
+        .maybeSingle();
+
+      if (nisnError) {
+        console.error("NISN search error:", nisnError);
+
+        return NextResponse.json(
+          {
+            success: false,
+            message:
+              "Terjadi kesalahan saat mencari data siswa berdasarkan NISN.",
+          },
+          { status: 500 },
+        );
+      }
+
+      student = studentByNisn;
     }
 
     if (!student) {
@@ -80,7 +117,7 @@ export async function POST(request: Request) {
           success: false,
           message: "Data siswa tidak ditemukan. Pastikan NIS/NISN benar.",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -91,13 +128,15 @@ export async function POST(request: Request) {
         "Berikut hasil pengumuman kelulusan Anda.",
       student,
     });
-  } catch {
+  } catch (error) {
+    console.error("Graduation check request error:", error);
+
     return NextResponse.json(
       {
         success: false,
         message: "Request tidak valid.",
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 }
